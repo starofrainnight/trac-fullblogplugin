@@ -389,10 +389,10 @@ class FullBlogModule(Component):
             data['blog_num_items'] = self.num_items
             return 'fullblog.rss', data, 'application/rss+xml'
 
-        data['blog_months'], data['blog_authors'], data['blog_categories'], \
-                data['blog_total'] = \
-                    blog_core.get_months_authors_categories(
-                        user=req.authname, perm=req.perm)
+        # data['blog_months'], data['blog_authors'], data['blog_categories'], \
+        #         data['blog_total'] = \
+        #             blog_core.get_months_authors_categories(
+        #                 user=req.authname, perm=req.perm)
         if 'BLOG_CREATE' in req.perm('blog'):
             add_ctxtnav(req, 'New Post', href=req.href.blog('create'),
                     title="Create new Blog Post")
