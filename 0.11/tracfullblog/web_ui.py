@@ -141,19 +141,16 @@ class FullBlogModule(Component):
             data['blog_post_list'] = []
             count = 0
             maxcount = self.num_items
-            blog_posts = get_blog_posts(self.env)
-            for post in blog_posts:
+            for post in iter_blog_posts(self.env):
                 bp = BlogPost(self.env, post[0], post[1])
                 if 'BLOG_VIEW' in req.perm(bp.resource):
                     data['blog_post_list'].append(bp)
                     count += 1
-                if maxcount and count == maxcount:
+                if maxcount and (count == maxcount):
                     # Only display a certain number on front page (from config)
                     break
-            data['blog_list_title'] = "Recent posts" + \
-                    (len(blog_posts) > maxcount and \
-                        " (max %d) - Browse or Archive for more" % (maxcount,) \
-                    or '')
+            data['blog_list_title'] = ("Recent posts %d" % count + 
+                        " (max %d) - Browse or Archive for more..." % maxcount)
             add_link(req, 'alternate', req.href.blog(format='rss'), 'RSS Feed',
                      'application/rss+xml', 'rss')
 

@@ -26,7 +26,8 @@ except ImportError:
 
 __all__ = ['BlogComment', 'BlogPost',
            'search_blog_posts', 'search_blog_comments',
-           'get_blog_posts', 'get_blog_comments',
+           'iter_blog_posts', 'get_blog_posts',
+           'get_blog_comments',
            'group_posts_by_month', 'get_blog_resources']
 
 # Public functions
@@ -91,7 +92,7 @@ def search_blog_comments(env, terms):
     return [(row[0], row[1], row[2], row[3], to_datetime(row[4], utc))
             for row in cursor]
 
-def get_blog_posts(env, category='', author='', from_dt=None, to_dt=None,
+def iter_blog_posts(env, category='', author='', from_dt=None, to_dt=None,
         all_versions=False):
     """ Utility method to fetch one or more posts from the database.
 
@@ -153,16 +154,27 @@ def get_blog_posts(env, category='', author='', from_dt=None, to_dt=None,
         cursor = db.cursor()
         cursor.execute(sql, args)
 
-    # Return the rows
-    blog_posts = []
     for row in cursor:
         # Extra check needed to weed out almost-matches where requested
         # category is a substring of another (searched using LIKE)
         categories = _parse_categories(row[6])
         if category and category not in categories:
             continue
-        blog_posts.append((row[0], row[1], to_datetime(row[2], utc), row[3],
-                row[4], row[5], categories))
+
+        yield (row[0], row[1], to_datetime(row[2], utc), row[3],
+                row[4], row[5], categories)
+
+
+def get_blog_posts(*args, **kwargs):
+    """ Utility method to fetch one or more posts from the database.
+
+    @ref iter_blog_posts()
+    """
+
+    blog_posts = []
+    for row_data in iter_blog_posts(*args, **kwargs):
+        blog_posts.append(row_data)
+
     return blog_posts
 
 def get_blog_comments(env, post_name='', from_dt=None, to_dt=None):
