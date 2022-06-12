@@ -22,6 +22,36 @@
   </head>
 
   <body>
+    <!--! Macro to render view buttons -->
+    <div py:def="render_blog_view_buttons()" class="blog-view-buttons">
+      <!--! Buttons for edit etc. -->
+      <py:if test="not list_mode and ('BLOG_MODIFY_ALL' in perm(blog_post.resource) or (
+              blog_post.author==perm.username and 'BLOG_MODIFY_OWN' in perm(blog_post.resource)))">
+        <div class="buttons">
+          <form method="get" action="${href.blog('edit', blog_post.name)}">
+            <div>
+              <input type="submit" value="${_('Edit post')}" accesskey="e" />
+            </div>
+          </form>
+          <py:choose test="defined('attach_file_form')">
+            <py:when test="True">
+              ${attach_file_form(blog_attachments)}
+            </py:when>
+            <py:when test="False">
+              <xi:include href="attach_file_form.html"
+                          py:with="alist=blog_attachments"/>
+            </py:when>
+          </py:choose>
+          <form method="get" action="${href.blog('delete', blog_post.name)}"
+                py:if="'BLOG_DELETE' in perm(blog_post.resource)">
+            <div>
+              <input type="submit" value="${_('Delete...')}"
+                  accesskey="d" />
+            </div>
+          </form>
+        </div>
+      </py:if>
+    </div>
 
     <xi:include href="fullblog_macro_post.html" />
 
@@ -34,35 +64,9 @@
         <!--! View single post with comments -->
 
         <py:if test="defined('blog_post') and blog_post.version">
+          ${render_blog_view_buttons()}
           ${render_blog_post(blog_post)}
-
-          <!--! Buttons for edit etc. -->
-          <py:if test="not list_mode and ('BLOG_MODIFY_ALL' in perm(blog_post.resource) or (
-                  blog_post.author==perm.username and 'BLOG_MODIFY_OWN' in perm(blog_post.resource)))">
-            <div class="buttons">
-              <form method="get" action="${href.blog('edit', blog_post.name)}">
-                <div>
-                  <input type="submit" value="${_('Edit post')}" accesskey="e" />
-                </div>
-              </form>
-              <py:choose test="defined('attach_file_form')">
-                <py:when test="True">
-                  ${attach_file_form(blog_attachments)}
-                </py:when>
-                <py:when test="False">
-                  <xi:include href="attach_file_form.html"
-                              py:with="alist=blog_attachments"/>
-                </py:when>
-              </py:choose>
-              <form method="get" action="${href.blog('delete', blog_post.name)}"
-                    py:if="'BLOG_DELETE' in perm(blog_post.resource)">
-                <div>
-                  <input type="submit" value="${_('Delete...')}"
-                      accesskey="d" />
-                </div>
-              </form>
-            </div>
-          </py:if>
+          ${render_blog_view_buttons()}
 
           <!--! List attachments -->
           <py:choose test="defined('list_of_attachments')">
